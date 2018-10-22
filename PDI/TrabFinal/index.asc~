@@ -1,0 +1,616 @@
+:numbered:
+:author: Vanessa Dantas -vanessa.dantas796@gmail.com
+:data-uri:
+:icons: font
+:experimental:
+:stem:
+:source-highlighter: coderay
+:toc: left
+:doctype: book
+
+:caution-caption: Cuidado
+:important-caption: Importante
+:note-caption: Nota
+:tip-caption: Dica
+:warning-caption: Aviso
+:appendix-caption: Appêndice
+:listing-caption: Listagem
+:table-caption: Tabela
+:toc-title: Sumário
+:preface-title: Prefácio
+:version-label: Versão
+:last-update-label: Última atualização
+
+= Processamento Digital de Imagens Trabalho Final: Matrizes de Co-Ocorrência - Descritores de Regiões e Análise de Textura = 
+Vanessa Dantas-vanessa.dantas796@gmail.com
+João Marcos Araújo-jmarcos.araujo96@gmail.com
+
+Este material consiste no Trabalho Final da disciplina Processamento Digital de Imagens lecionada por Agostinho Brito Jr. Para voltar para o início acessar https://vanessadants.github.io/
+
+
+== Aplicação
+
+Acessar via <<codigo/index#,Aplicação>>
+
+== Introdução
+
+Ao longo da terceira unidade da disciplina DCA0445 - Processamento Digital de Imagens, foram expostos em sala de aula vários métodos para a representação e descrição de regiões. Um deles foi a descrição de regiões por análise de textura, através de descritores de Haralick, calculados a partir de matrizes de co-ocorrência. 
+
+Esse trabalho teve por objetivo criar uma aplicação JavaScript onde uma imagem é carregada e a partir desta, são calculados, em tempo real, seis tipos de descritores diferentes para uma região de interesse específica da imagem, que é selecionada pelo usuário da aplicação. 
+
+
+== Referencial Teórico
+
+A textura é normalmente definida como uma superfície topográfica, com pontos altos e baixos. Uma textura áspera geralmente é caracterizada por uma grande diferença entre esses pontos em um espaço pequeno. Já uma textura lisa é caracterizada por pouca diferença em um espaço de mesmo tamanho.
+
+A partir dessa definição de textura, podemos fazer um paralelo com texturas de imagens, onde, ao invés de termos diferenças entre pontos altos e baixos, temos a diferença entre o brilho dos pixels em uma região pré-estabelecida.
+A análise da textura de uma imagem pode ser realizada de diversas maneiras. Uma destas maneiras é através da matriz de co-ocorrência, foco deste trabalho. 
+
+A matriz de co-ocorrência é utilizada para retirar informações sobre as posições relativas dos pixels de uma imagem. Existem várias formas de se calcular uma matriz de co-ocorrência, e a sua finalidade é contabilizar a quantidade de vezes em que tons de cinza ocorreram lado a lado. Por exemplo, para a matriz de co-ocorrência G, os seus elementos gij contabilizam a quantidade de vezes que o tom de cinza j ocorreu à direita do tom de cinza i. Sendo assim, podemos definir a matriz de co-ocorrência como uma tabela de combinações de valores de níveis de cinza que ocorrem em uma imagem.
+	
+É importante ressaltar que esse método de analisar os pixels à direita é apenas uma de várias maneiras de se calcular a matriz de co-ocorrência. Essas estratégias serão mostradas mais a frente.
+Também é importante destacar que geralmente as imagens analisadas apresentam até 256 tons de cinza, o que resultaria numa matriz de co-ocorrência de tamanho 256 x 256. Como essa matriz é relativamente grande, é comum quantizar as imagens, resultando assim em matrizes menores e cálculos mais rápidos.
+
+
+
+
+
+== Metodologia
+
+Foi mencionado anteriormente que existem vários métodos de se calcular a matriz de co-ocorrência de uma imagem, o que é fácil de perceber quando relacionado com o conceito de vizinhança de um pixel. Se a matriz de co-ocorrência é definida como uma tabela de combinações de tons de cinza ocorridos em uma imagem, é justificável que essa tabela possa ser criada de qualquer combinação entre pixels relacionados através de uma vizinhança. Isso quer dizer que uma matriz de co-ocorrência pode ser calculada utilizando qualquer um dos oito pixels da vizinhança do pixel atual.           
+
+Matematicamente, uma matriz de co-ocorrência P pode ser definida em função de quatro valores P(i, j, d, theta). Onde i e j são os pixels vizinhos de acordo com a distância d. Essa distância d entre os pixels i e j é analisada de acordo com uma direção , como pode ser observado na imagem abaixo.
+
+.possíveis valores de theta
+image::imagens/imagem1.png[]
+
+
+Para cada ângulo (0º, 45º, 90º e 135º) é possível calcular duas matrizes de co-ocorrência, totalizando assim oito matrizes no total. Também é possível calcular uma matriz para cada direção orientada por ângulo, o que resulta em quatro matrizes (horizontal, vertical e duas diagonais). Existem várias vantagens no cálculo desse tipo de matriz, uma delas é que a matriz de co-ocorrência conterá mais informação que uma criada apenas para apenas uma direção orientada por um ângulo. 
+
+Outra vantagem da matriz de co-ocorrência para cada direção orientada por ângulo é que ela pode ser facilmente calculada a partir da matriz de co-ocorrência normal de cada direção, visto que ela será a soma dos elementos da matriz espelhados pela diagonal da matriz.
+
+
+
+.Cálculo da matriz de co-ocorrência para P(i,j,1,0º).
+image::imagens/imagem2.png[]
+
+
+
+Após a matriz de probabilidades P ser calculada, ela é normalizada pela soma total de seus valores, criando assim uma matriz de probabilidade de co-ocorrências p(i,j):
+
+.Matriz de probabilidade.
+image::imagens/imagem3.png[]
+
+A partir da matriz de probabilidades p(i,j) é que as principais informações contidas na imagem serão retiradas.
+
+=== Descritores de Haralick
+
+Apesar de uma matriz de co-ocorrência, por si só, apresentar muita informação, esta informação geralmente não é de fácil entendimento. Sendo assim, a partir dessa matriz, são calculados valores numéricos que facilitam o entendimento da informação que a matriz trás.
+
+Estes valores, denominados descritores, são fundamentais para a análise de uma matriz de co-ocorrência. Haralick, em 1973, propôs 14 descritores diferentes que poderiam ser utilizados para a extração de informação da matriz de co-ocorrência, neste trabalho, foram implementados seis descritores de Haralick, mostrados na tabela abaixo.
+
+.Tabela com o cálculo dos descritores de Haralick.
+image::imagens/imagem4.png[]
+
+
+== Interface
+
+Para a aplicação desenvolvida, implementamos uma interface dividada entre cabeçalho, corpo e rodapé. No cabeçalo, inserimos o título do trabalho "Cálculo de Co-ocorrências e momentos estatísticos de uma região da imagem". No corpo, foram criadas duas regiões, uma destinada para o carregamento da imagem e exibição da região de interesse, e outra, para exibir as informações de co-ocorrências e modificar os parâmetros que delimitam a região de interesse (representada por um quadrado preto). No rodapé, apenas inserimos informações acerca do trabalho e direitos autorais. Além disso, foi feito um botão de retorno, permitindo ao usuário voltar a página do relatório do trabalho. Conforme imagem:
+
+.Interface da aplicação.
+image::imagens/imagem5.png[]
+
+
+== Código Desenvolvido
+
+Para o trabalho descrito, desenvolvemos um código utilizando as linguagens: html, css e javascript. O html foi responsável pela criação da estrutura da página web, já o css, permitiu estilização da página. Por fim, o javascript corresponde ao funcionamento da estrutura web. Ele que possibilitou o uso de recursos do opencv.js para manipulação de imagens. Abaixo, o código desenvolvido:
+
+[source,html]
+----
+include::Codigo/index.html[]
+----
+
+== Explicação do Código
+
+Primeiramente, na estrutura do html implementamos o cabeçalho <head>, nele especificamos a cor de fundo através de style="background-color:#4A708B;". Veja:
+
+[source,html]
+----
+<html>
+
+<head>
+<meta charset="utf-8">
+<div id="header" style="background-color:#4A708B;">
+<h1 align="center" style="margin-bottom:0;color:white;" >Cálculo de Co-ocorrências e momentos estatísticos de uma região da imagem</h1>
+
+</div>
+
+</head>
+
+----
+
+Em seguida, na primeira parte do corpo da estrutura html <body>, foi criada a região para exibir os cálculos das co-ocorrências e os sliders responsáveis pela delimitação da região de interesse, bem como o botão de retorno. Esta região foi criada com id="Informacoes".  
+
+
+Para as informações de co-ocorrências exibidas, apenas criamos uma região do tipo texto, na qual pudessemos exibir os resultados calculados. 
+
+[source,html]
+----
+
+	<h2 align="center" style="color:Black;" > Co-ocorrências </h2>
+
+	
+
+	<text1 style="margin-left:1em;" id="ProbMax"> Probabilidade Máxima </text1>
+
+	<br />	
+
+	<text2 style="margin-left:1em;" id="Correlacao"> Correlação </text2>
+
+	<br />
+
+	<text3 style="margin-left:1em;" id="Contraste"> Contraste </text3>
+
+	<br />
+
+	<text4 style="margin-left:1em;" id="Uniformidade"> Uniformidade </text4>
+
+	<br />
+
+	<text5 style="margin-left:1em;" id="Homogeneidade"> Homogeneidade </text5>
+
+	<br />
+
+	<text6 style="margin-left:1em;" id="Entropia"> Entropia </text6>
+
+	<br />
+
+	<h3 align="center" style="color:Black;" > Definir Área de Interesse</h3>
+
+
+----
+
+
+Quanto aos sliders, usamos a classe "slidecontainer" que permite criar um elemento do tipo slider com range determinado (podemos determinar o valor mínimo e máximo). Qualquer modificação do valor do slider resulta na chamada da função change(), em onchange="change()".
+
+
+[source,html]
+----
+
+	<div class="slidecontainer" id="slideContainer" style="margin-left:1em;height:30%">
+    	
+  		<p>Mover Horizontalmente:</p>
+  		<input type="range" min="0" max="100" value="50" id="moverHorizontalmente" onchange="change()">
+  
+  		<p>Mover Verticalmente:</p>
+  		<input type="range" min="0" max="100" value="50" id="moverVerticalmente" onchange="change()">
+        
+        	<p>Tamanho da Região de Interesse:</p>
+  		<input type="range" min="1" max="100" value="50" id="ladoQuadrado" onchange="change()">
+        
+        
+	</div>
+
+----
+
+Ainda, a última função implementada na div de id="Informacoes" foi o botão de retorno. Para tanto, criamos um elemento do tipo button que ao ser clicado executa a função Retornar em onclick="Retornar()", conforme: 
+
+
+[source,html]
+----
+
+	<!-- Botao para retornar à página principal-->
+
+	<button onclick="Retornar()" id="botaoRetornar" style="margin-left:45%;">Retornar</button>
+
+----
+
+Em seguida, na segunda parte do corpo da estrutura html <body>, foi criada a região para carregamento da imagem e exibição da região de interesse com id="CarregamentoDaImagem".
+
+Para o carregamento da imagem, utilizamos o tipo file para escolher o arquivo a ser carregado em:
+
+[source,html]
+----
+<input type="file" name="myFile" id="fileUpload"/> <br />
+----
+
+Este determinou a imagem a ser exibida no tipo imagem:
+[source,html]
+----
+<img src="" alt="Carregar Imagem..." width="350em" height="" style="border:1px solid #d3d3d3;" id="imagem"/>
+----
+
+Uma vez a imagem carregada, podemos determinar a região de interesse. Essa última foi exibida em uma estrutura do tipo canvas, própria para manipulação de imagens com o opencv.js.
+
+[source,html]
+----
+
+<canvas id="canvasOutput" width="" height="" style="border:1px solid #d3d3d3;"></canvas>
+----
+
+Então exibimos essa estrutura inteira como uma tabela, para que a imagem de entrada e região de interesse ficassem uma ao lado da outra. Para isso usamos o tido tabela:
+
+[source,html]
+----
+
+<table style="background-color:#B0E2FF;height:100%;width:75%;" cellpadding="0" cellspacing="0" width="0" border="0" id="table">
+
+----
+
+
+O responsável pelo carregamento da imagem e cálculo das co-ocorrências foi o script na linguagem javascript (js). Este inicia com:
+
+[source,html]
+----
+<script src="opencv.js" type="text/javascript"></script>
+<script type="text/javascript">
+----
+
+Permitindo o uso do opencv.js e finaliza com:
+
+[source,html]
+----
+</script>
+<script async src="opencv.js" type="text/javascript" onload="onOpenCvReady();" onerror="onOpenCvError();"></script>
+
+----
+
+Neste script, a primeira função realizada é a de abertura e carregamento da imagem. Isto é feito através de:
+[source,js]
+----
+//carregar imagem
+	let imgElement = document.getElementById('imagem');
+	let inputElement = document.getElementById('fileUpload');
+	inputElement.addEventListener('change', (e) => {
+	    imgElement.src = URL.createObjectURL(e.target.files[0]);
+	}, false);
+
+	imgElement.onload = function() {
+	    change();
+	};
+----
+
+Nesta vemos que imgElement recebe o elemento imagem e que o inputElement recebe o file que foi escolhido pelo usuário para ser carregado. Assim, adicionamos o elemento a lista de eventos e fazemos a imagem receber como src o url do file escolhido. Ao carregar a imagem, chamamos a função change();
+
+Na função change(), primeiramente definimos a região de interesse, através do código:
+
+[source,js]
+----
+//com base nos trackbars definimos a regiao de interesse RI
+	    var posHor=document.getElementById("moverHorizontalmente").value;
+	    var posVert=document.getElementById("moverVerticalmente").value;
+	    
+
+	    var altura=document.getElementById("imagem").height;
+
+
+	    var tamLado=document.getElementById("ladoQuadrado").value;
+	    tamLado=tamLado*largura/100;
+
+	    var RI_yIn=posHor*largura/100;
+	    var RI_xIn=posVert*altura/100;
+
+	    var RI_xFim=RI_xIn+tamLado;
+	    var RI_yFim=RI_yIn+tamLado;
+
+	    if(RI_xFim>altura){
+	    	tamLado=(altura-RI_xIn);
+	    	RI_xFim=RI_xIn+tamLado;
+	   		RI_yFim=RI_yIn+tamLado;
+	    }
+		if(RI_yFim>largura){
+	    	tamLado=(largura-RI_yIn);
+	    	RI_xFim=RI_xIn+tamLado;
+	   		RI_yFim=RI_yIn+tamLado;
+	    }
+----
+
+
+Neste, calculamos o x inicial e final, bem como o y inicial e final. Em outras palavras, para cálculo das co-ocorrências, percorremos a imagem apenas nessa região. Vale ressaltar que utilizamos o sistema x y do opencv, cuja orientação é dada por:
+
+.Orientação utilizada, x corresponde à altura e y à largura da imagem.
+image::imagens/imagem6.png[]
+
+Agora, podemos exibir a imagem (a imagem precisa ser em tons de cinza, por isso é feita uma conversão) no canvas e sua região de interesse, fazemos isso em:
+
+[source,js]
+----
+	//converter imagem para matriz para tons de cinza
+		let mat = cv.imread(imgElement);
+		let image = new cv.Mat();		
+		let gray = new cv.Mat();
+		cv.cvtColor(mat, gray, cv.COLOR_RGBA2GRAY, 0);    	
+		gray.copyTo(image);
+    	
+    	//desenhar retangulo (Mat& img, Point pt1, Point pt2, const Scalar& color, int thickness=1, int lineType=8, int shift=0)
+    	let rect = new cv.Rect(RI_yIn,RI_xIn,tamLado,tamLado);
+		let rectangleColor = new cv.Scalar(0, 0, 0);
+	
+		let point1 = new cv.Point(rect.x, rect.y);
+		let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+		cv.rectangle(gray, point1, point2, rectangleColor, 2, cv.LINE_AA, 0);
+	
+    	//exibir imagem com o retangulo desenhado
+		cv.imshow('canvasOutput', gray);
+	 
+----
+
+No passo seguinte, é calculado os descritores de Haralick. Para isso, precisamos da somatória dos valores da matriz image de entrada dentro da região de interesse:
+
+[source,js]
+----
+		var soma =0;
+		var i;
+		var j;
+
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				soma=soma+image.ucharPtr(i,j)[0];
+			}
+		}
+		//pij == image/soma
+----
+
+O cálculo da probabilidade máxima mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+	//probabilidade maxima
+
+		let result = cv.minMaxLoc(image);
+		let max = result.maxVal;
+    	let probMax=max/soma;
+    	document.getElementById("ProbMax").innerHTML='Probabilidade Máxima: '+probMax.toString();
+----
+
+O cálculo da correlação mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+	//correlacao
+
+    	//calcular mr
+    	let mr=0;
+    	for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				mr=mr+i*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}
+
+		//calcular mc
+		let mc=0;
+		for(j = RI_xIn; j< RI_xFim;j++){
+			for (i = RI_yIn; i < RI_yFim; i++) {
+				mc=mc+j*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}	
+
+		//calcular deltar
+		let deltar=0;
+    	for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				deltar=deltar+(i-mr)*(i-mr)*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}
+		deltar=Math.sqrt(deltar);
+		//calcular deltac
+		let deltac=0;
+		for(j = RI_xIn; j< RI_xFim;j++){
+			for (i = RI_yIn; i < RI_yFim; i++) {
+				deltac=deltac+(j-mc)*(j-mc)*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}	
+		deltac=Math.sqrt(deltac);
+
+		//Agora podemos calcular a correlacao
+		let correlacao=0;
+		
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				correlacao=correlacao+(i-mr)*(j-mc)*(image.ucharPtr(i,j)[0]/soma)/(deltac*deltar);
+			}
+		}	
+		
+		document.getElementById("Correlacao").innerHTML='Correlação: '+correlacao.toString();
+----
+
+O cálculo do contraste mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+		//contraste
+
+		let contraste=0;
+
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				contraste=contraste+(i-j)*(i-j)*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}		
+
+
+
+		document.getElementById("Contraste").innerHTML='Contraste: '+contraste.toString();
+----
+
+
+O cálculo da uniformidade máxima mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+		//uniformidade
+
+		let uniformidade=0;
+
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				uniformidade=uniformidade+(image.ucharPtr(i,j)[0]/soma)*(image.ucharPtr(i,j)[0]/soma);
+			}
+		}
+		document.getElementById("Uniformidade").innerHTML='Uniformidade: '+uniformidade.toString();
+----
+
+O cálculo da homogeneidade máxima mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+		//homogeneidade
+
+		let homogeneidade=0;
+
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				homogeneidade=homogeneidade+(image.ucharPtr(i,j)[0]/soma)/(1+Math.abs(i-j));
+			}
+		}
+		document.getElementById("Homogeneidade").innerHTML='Homogeneidade: '+homogeneidade.toString();
+----
+
+O cálculo da entropia máxima mostrado na "Figure4:Tabela com o cálculo dos descritores de Haralick" é então feito e exibido na região de texto destinada a mesma.
+
+[source,js]
+----
+		//entropia
+
+		let entropia=0;
+
+		for (i = RI_yIn; i < RI_yFim; i++) {
+			for(j = RI_xIn; j< RI_xFim;j++){
+				if(image.ucharPtr(i,j)[0]!=0){
+					entropia=entropia+(image.ucharPtr(i,j)[0]/soma)*Math.log2(soma/image.ucharPtr(i,j)[0]);
+				}else{
+					entropia=entropia+(image.ucharPtr(i,j)[0]/soma)*Math.log2(soma/0.0001);
+				}
+				
+			}
+		}
+		document.getElementById("Entropia").innerHTML='Entropia: '+entropia.toString();
+----
+
+Antes de finalizar a função change(), liberamos o espaço ocupado pelas variáveis:
+
+[source,js]
+----
+		mr.delete();
+		mc.delete();
+		deltar.delete();
+		deltac.delete();
+		correlacao.delete();
+		contraste.delete();
+		probMax.delete();
+		uniformidade.delete();
+		homogeneidade.delete();
+		entropia.delete();
+		max.delete();
+		result.delete();
+		pij.delete();			    
+		posHor.delete();
+		posVert.delete().
+		tamLado.delete();
+		altura.delete();
+		largura.delete();
+		RI_xIn.delete();
+		RI_yIn.delete();
+		RI_xFim.delete();
+		RI_yFim.delete();
+		gray.delete();
+		mat.delete();
+    		image.delete();
+    		rect.delete();
+    		rectangleColor.delete();
+    		point1.delete();
+    		point2.delete();
+----
+
+Em seguinda, descrevemos a função que permite que ao clicar no botão de retorno, retornemos à página anterior:
+
+[source,js]
+----
+	//redirecionar para a pagina inicial do trabalho
+	function Retornar()
+	{
+		location.href="https://vanessadants.github.io/PDI/TrabFinal/index.html";
+	}
+----
+
+
+As funções seguintes, servem para verificar se o opencv.js está pronto para executar ou se houve erro:
+
+[source,js]
+----
+
+	function onOpenCvReady() { // eslint-disable-line no-unused-vars
+	    document.getElementById('status').innerHTML = '<b>OpenCV.js is ready</b>.' +
+	        'You can upload an image.<br>' +
+	        'The <b>imageSrc</b> is a &lt;img&gt; element used as cv.Mat input. ' +
+	        'The <b>canvasOutput</b> is a &lt;canvas&gt; element used as cv.Mat output.';
+	}
+
+	function onOpenCvError() { // eslint-disable-line no-unused-vars
+	    let element = document.getElementById('status');
+	    element.setAttribute('class', 'err');
+	    element.innerHTML = 'Failed to load opencv.js';
+	}
+----
+
+
+Finalizado o script js e o corpo do html, inserimos um rodapé com informações sobre direitos autorais do trabalho.
+
+[source,js]
+----
+
+<footer>
+	<div id="footer" style="background-color:#9FB6CD;clear:both;text-align:center;float:bottom;font-size:12">
+	Trabalho da terceira unidade de Processamento Digital de Imagens da Universidade Federal do RN do curso de Engenharia da Computação. Este trabalho foi feito por Vanessa Dantas de Souto Costa (vanessa.dantas796@gmail.com) e  João Marcos Araújo do Valle (jmarcos.araujo96@gmail.com), professor orientador: Agostinho Brito Jr. 
+	</div>
+
+</footer>
+----
+
+== Uso da aplicação
+
+* Passo 1: Carregar imagem
+
+
+.Clique para abrir o explorador de arquivos
+image::imagens/imagem7.png[]
+
+.Escolha a imagem a ser aberta
+image::imagens/imagem8.png[]
+
+* Passo 2: Delimitar a região de interesse
+
+.Movendo os sliders é possível delimitar a região de interesse
+image::imagens/imagem9.png[]
+
+
+Perceba que modificar a região de interesse afeta diretamente nos cálculos:
+
+.Região de interesse 1
+image::imagens/imagem10.png[]
+
+.Região de interesse 2
+image::imagens/imagem11.png[]
+
+
+
+== Conclusões
+
+
+
+Para a proposta do trabalho, podemos perceber que o programa desenvolvido obteve boa performance. Para tanto, os requisitos tidos como desejáveis foram: interface amigável e fácil de usar, cálculo de co-ocorrências que variasse dependendo da região de interesse delimitada, possibilidade de ajuste da região de interesse e possibilidade de carregar imagens coloridas e em tons de cinza. Nesses requesitos, nossa aplicação atendeu a todos.
+
+A importância dos descritores de Haralick se dá também no campo de identificação de objetos usando inteligência artificial, uma vez que, esses decritores permitem aprimorar o processo de extração de features para "alimentar" a IA. Por isso, vemos que o desenvolvimento desse trabalho foi imprescindível para nossa formação acadêmica.
+
+== Referências
+
+
+http://www2.ic.uff.br/~aconci/co-ocorrencia.pdf
+
+https://docs.opencv.org/3.4.1/d4/da1/tutorial_js_setup.html
+
+https://docs.opencv.org/3.4.1/df/df7/tutorial_js_table_of_contents_setup.html
+
+http://wiki.icmc.usp.br/images/d/d7/Dip10_imagedescription-texture.pdf
+
+

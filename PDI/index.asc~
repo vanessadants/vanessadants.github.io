@@ -1,0 +1,406 @@
+:numbered:
+:author: Vanessa Dantas -vanessa.dantas796@gmail.com
+:data-uri:
+:icons: font
+:experimental:
+:stem:
+:source-highlighter: coderay
+:toc: left
+:doctype: book
+
+:caution-caption: Cuidado
+:important-caption: Importante
+:note-caption: Nota
+:tip-caption: Dica
+:warning-caption: Aviso
+:appendix-caption: Appêndice
+:listing-caption: Listagem
+:table-caption: Tabela
+:toc-title: Sumário
+:preface-title: Prefácio
+:version-label: Versão
+:last-update-label: Última atualização
+
+= Processamento Digital de Imagens = 
+Vanessa Dantas - vanessa.dantas796@gmail.com [2018.1 - UFRN/DCA]
+
+Este material consiste na resolução das atividades da disciplina Processamento Digital de Imagens lecionada por Agostinho Brito Jr. Todas as atividades constam em http://agostinhobritojr.github.io/tutoriais/pdi/. Além disso, a resolução e códigos de todas essas atividades se encontram no meu GitHub: https://github.com/vanessadants. Para voltar para o início acessar https://vanessadants.github.io/
+
+== Unidade 1
+=== Manipulando pixels em uma imagem
+=== Negativo em retângulo
+
+* Utilizando o programa exemplos/pixels.cpp como referência, implemente um programa regions.cpp. Esse programa deverá solicitar ao usuário as coordenadas de dois pontos P1 e P2 localizados dentro dos limites do tamanho da imagem e exibir que lhe for fornecida. Entretanto, a região definida pelo retângulo de vértices opostos definidos pelos pontos P1 e P2 será exibida com o negativo da imagem na região correspondente. O efeito é ilustrado na Figura Regiões.
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv2/regions.cpp[]
+----
+
+	Conforme podemos perceber o código recebe 2 pontos do usuário e para o retângulo formado naquela região cada pixel tem seu valor modificado para 255 menos o valor do pixel, assim a cor fica em negativo.
+
+.imagem de entrada
+image::atv2/vanessa.png[]
+
+.terminal
+image::imagens/2_1_terminal.png[]
+
+.imagem de entrada aberta em tons de cinza
+image::imagens/2_imagemAntes.png[]
+
+.imagem de saída invertida as cores do retângulo
+image::imagens/2_1_imagemDepois.png[]
+
+=== Troca de Regiões
+
+* Utilizando o programa exemplos/pixels.cpp como referência, implemente um programa trocaregioes.cpp. Seu programa deverá trocar os quadrantes em diagonal na imagem. Explore o uso da classe Mat e seus construtores para criar as regiões que serão trocadas. O efeito é ilustrado na Figura Troca de regiões.
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv2/trocaregioes.cpp[]
+----
+
+	Utilizamos como imagem de entrada a mesma da tarefa anterior. Para trocar as regiões, entenderemos a imagem com 4 quadrantes:
+
+
+.Quadrantes
+image::imagens/quadrantes.png[]
+
+	Para trocar os quadrantes entre si identificamos 2 tipos de troca, quadrante 1 e 4 e outra situação entre o quadrante 2 e 3, vide o código mostrado acima.
+
+	As saídas do código foram:
+
+.terminal
+image::imagens/2_2_terminal.png[]
+
+.imagem de entrada aberta em tons de cinza
+image::imagens/2_imagemAntes.png[]
+
+.imagem de saída com os quadrantes trocados
+image::imagens/2_2_imagemDepois.png[]
+
+
+=== Preenchendo regiões
+=== Labeling em mais de 255 elementos
+
+* Observando-se o programa labeling.cpp como exemplo, é possível verificar que caso existam mais de 255 objetos na cena, o processo de rotulação poderá ficar comprometido. Identifique a situação em que isso ocorre e proponha uma solução para este problema.
+
+	O código labeling.png utiliza o número do objeto encontrado como o tom de preenchimento daquele objeto, de modo que no fim o objeto terá o valor máximo de nobjects. Desse modo,se houvessem mais de 255 objetos na cena, não poderíamos executar o floodFill utilizando o nobjects, pois trabalhamos com apenas 256 tons de cinza (de 0 a 255), bem como o fato de que o elemento 255 seria pintado com sua própria cor 255, o que é reduntante e produz um erro na contagem (já que um objeto normalmente não é formado por apenas um pixel, ele contaria o mesmo objeto várias vezes).
+
+	Uma solução para este problema seria passar a usar uma imagem colorida, com componentes RGB indo de 0 até 255, aumentariamos o valor máximo da contagem.
+
+
+
+
+=== Contando elementos de uma Imagem
+
+* Aprimore o algoritmo de contagem apresentado para identificar regiões com ou sem buracos internos que existam na cena. Assuma que objetos com mais de um buraco podem existir. Inclua suporte no seu algoritmo para não contar bolhas que tocam as bordas da imagem. Não se pode presumir, a priori, que elas tenham buracos ou não.
+
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv3/labelingAprimorado.cpp[]
+----
+
+	Esse programa é uma modificação do código labeling.cpp descrito nas atividades da disciplina. A mudança está no fato de que, para as regiões contabilizadas com o uso do floodfill, é feita uma análise para determinar se a região é ou não uma bolha.
+
+.imagem de entrada
+image::atv3/bolhas.png[]
+
+.terminal
+image::imagens/3_2_terminal.png[]
+
+.imagem de entrada depois de contabilizados os objetos
+image::imagens/3_2_imagemDepois.png[]
+
+	Podemos perceber que esse código trata a situação de que uma bolha pode ter mais de 1 buraco, mas ainda ser a mesma bolha:
+
+.imagem de entrada modificada para apresentar bolhas com mais de 1 buraco
+image::atv3/bolhasModificado.png[]
+
+.terminal
+image::imagens/3_2_terminalVariasBolhas.png[]
+
+.imagem de entrada depois de contabilizados os objetos
+image::imagens/3_2_imagemVariasBolhas.png[]
+
+	Percebe que o número de bolhas permanece 7, o que é o esperado.
+
+
+
+=== Manipulação de histogramas
+=== Equalização de histograma
+
+* Utilizando o programa exemplos/histogram.cpp como referência, implemente um programa equalize.cpp. Este deverá, para cada imagem capturada, realizar a equalização do histogram antes de exibir a imagem. Teste sua implementação apontando a câmera para ambientes com iluminações variadas e observando o efeito gerado. Assuma que as imagens processadas serão em tons de cinza.
+
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv4/equalize.cpp[]
+----
+
+	Esse programa é uma modificação do código histogram.cpp descrito nas atividades da disciplina. A mudança está no fato de que, para cada histograma foi feita uma equalização.
+
+.imagem não equalizada
+image::imagens/4_1Nequalizada.png[]
+
+.imagem equalizada
+image::imagens/4_1Equalizada.png[]
+
+	Foi feito também um vídeo comparativo:
+
+* video não equalizado
+https://youtu.be/gEhkJSrBFoQ
+
+* video equalizado
+https://youtu.be/iXpXGFOPxrU
+
+=== Detector de Movimento
+
+* Utilizando o programa exemplos/histogram.cpp como referência, implemente um programa motiondetector.cpp. Este deverá continuamente calcular o histograma da imagem (apenas uma componente de cor é suficiente) e compará-lo com o último histograma calculado. Quando a diferença entre estes ultrapassar um limiar pré-estabelecido, ative um alarme. Utilize uma função de comparação que julgar conveniente.
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv4/motiondetector.cpp[]
+----
+
+	Esse programa é uma modificação do código histogram.cpp descrito nas atividades da disciplina. Ao invés de calcularmos os histogramas RGB, calculamos apenas o histR. Feito isso, criamos uma variável do tipo Mat que recebe o histR anterior. Por fim, comparamos esses 2 histogramas pela função aux=compareHist(histR,histOldR,CV_COMP_CORREL) e se aux<=0.99 (valor arbitrário) disparamos um "alarme". Veja o vídeo mostrando o funcionamento do código:
+
+* video do detector de movimento
+https://youtu.be/hDpLISPe9zc
+
+
+=== Filtragem no domínio espacial I
+===Laplaciano do Gaussiano
+
+* Utilizando o programa exemplos/filtroespacial.cpp como referência, implemente um programa laplgauss.cpp. O programa deverá acrescentar mais uma funcionalidade ao exemplo fornecido, permitindo que seja calculado o laplaciano do gaussiano das imagens capturadas. Compare o resultado desse filtro com a simples aplicação do filtro laplaciano.
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv5/laplgauss.cpp[]
+----
+
+	Esse programa é uma modificação do código filtroespacial.cpp descrito nas atividades da disciplina. Foi feita um filtro chamado laplacianGauss e esse filtro corresponde ao filtro laplaciano do gaussiano.
+
+.imagem de apenas o filtro laplaciano aplicado
+image::imagens/5_1ApenasLap.png[]
+
+.imagem o filtro aplicado foi o laplaciano do gaussiano
+image::imagens/5_1LapDoGauss.png[]
+
+	Comparando um com o outro, notamos que no laplaciano do gaussiano as bordas aparecem mais evidenciadas. No entanto, há aumento de ruído em relação à imagem apenas do laplaciano.
+
+
+* video de demonstração
+https://youtu.be/Fn79ATVbtjU
+
+
+
+	
+=== Filtragem no domínio espacial II
+=== Tiltshift
+
+
+
+* Utilizando o programa exemplos/addweighted.cpp como referência, implemente um programa tiltshift.cpp. Três ajustes deverão ser providos na tela da interface:
+	* um ajuste para regular a altura da região central que entrará em foco;
+	* um ajuste para regular a força de decaimento da região borrada;
+	*um ajuste para regular a posição vertical do centro da região que entrará em foco. Finalizado o programa, a imagem produzida deverá ser salva em arquivo.
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv6/tiltshift.cpp[]
+----
+
+	Esse programa é uma modificação do código addweighted.cpp descrito nas atividades da disciplina. Foi gerado o efeito de tiltshift através da combinação de duas imagens, a imagem de entrada e a imagem borrada.
+
+.imagem com o efeito tiltshift
+image::imagens/6_1.png[]
+
+* video para exemplificação
+
+https://youtu.be/Ol4G3j9mLbw
+
+
+
+
+
+=== Tiltshift Video
+
+* Utilizando o programa exemplos/addweighted.cpp como referência, implemente um programa tiltshiftvideo.cpp. Tal programa deverá ser capaz de processar um arquivo de vídeo, produzir o efeito de tilt-shift nos quadros presentes e escrever o resultado em outro arquivo de vídeo. A ideia é criar um efeito de miniaturização de cenas. Descarte quadros em uma taxa que julgar conveniente para evidenciar o efeito de stop motion, comum em vídeos desse tipo.
+
+
+	Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv6/tiltshiftvideo.cpp[]
+----
+
+	Esse programa é uma modificação do código tiltshift.cpp descrito no exemplo anterior. Foi gerado o efeito de tiltshift para um video.
+
+
+* video para exemplificação
+https://youtu.be/da_k0FoD-_s
+
+
+
+
+== Unidade 2
+=== Filtragem no Domínio da Frequência
+=== Filtro Homomórfico
+* Utilizando o programa exemplos/dft.cpp como referência, implemente o filtro homomórfico para melhorar imagens com iluminação irregular. Crie uma cena mal iluminada e ajuste os parâmetros do filtro homomórfico para corrigir a iluminação da melhor forma possível. Assuma que a imagem fornecida é em tons de cinza.
+
+Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv7/filtrohomomorfico.cpp[]
+----
+
+	Esse programa é uma modificação do código dft.cpp descrito nas atividades da disciplina, um filtro homomórfico consiste em:
+ 
+.explicação de filtro homomórfico
+image::imagens/7_filtrohomomorfico.png[]
+
+	Foi gerado o efeito pedido com ajuste dos parâmetros C, D0, gammaL e gammaH. Sendo o C responsável pela suavidade do filtro, o D0 o raio do filtro, o gammaL corresponde à iluminância(baixas frequências) e o gammaH à reflectância(altas frequências).
+
+	A entrada do programa foi:
+
+.entrada do filtro homomórfico
+image::imagens/7_imagemOriginal.png[]
+
+
+	A saída do programa foi:
+
+.saída do filtro homomórfico
+image::imagens/7_imagemFiltrada.png[]
+
+	
+
+	Para exemplificação foi gravado um vídeo:
+
+* video para exemplificação
+https://youtu.be/zyedRpG-4LI
+
+
+=== Detecção de bordas com o algoritmo de Canny
+=== Refinamento da Técnica do Pontilhismo
+
+* Utilizando os programas exemplos/canny.cpp e exemplos/pontilhismo.cpp como referência, implemente um programa cannypoints.cpp. A idéia é usar as bordas produzidas pelo algoritmo de Canny para melhorar a qualidade da imagem pontilhista gerada. A forma como a informação de borda será usada é livre. Entretanto, são apresentadas algumas sugestões de técnicas que poderiam ser utilizadas:
+
+	* Desenhar pontos grandes na imagem pontilhista básica;
+
+	* Usar a posição dos pixels de borda encontrados pelo algoritmo de Canny para desenhar pontos nos respectivos locais na imagem gerada.
+
+	* Experimente ir aumentando os limiares do algoritmo de Canny e, para cada novo par de limiares, desenhar círculos cada vez menores nas posições encontradas. A Figura Pontilhismo aplicado à imagem Lena foi desenvolvida usando essa técnica.
+
+* Escolha uma imagem de seu gosto e aplique a técnica que você desenvolveu.
+
+* Descreva no seu relatório detalhes do procedimento usado para criar sua técnica pontilhista.
+
+
+
+Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv8/cannypoints.cpp[]
+----
+
+	Esse programa é uma modificação do código canny.cpp e pontilhismo.cpp descrito nas atividades da disciplina, pontilhismo consiste em uma técnica de pintura e desenho em que as imagens são definidas por pequenas manchas ou pontos.
+
+	Foi gerado o efeito pedido através do refinamento dos pontos a serem desenhados. Para tanto, primeiro foi executado o trecho de código do pontilhismo básico (descrito no tutorial) e, a posteriori, é utilizado o algoritmo de canny em um loop com 10 iterações. Para cada iteração alteramos o raio do circulo a ser desenhado (diminuindo-o) e os limiares T1 e T2 que estabelecem a relação de pontos de bordas fortes e fracas da imagem de bordas. Então, percorremos a imagem de bordas e para os pontos que fazem parte da mesma (em branco), desenhamos o círculo com o raio estabelecido para aquela iteração. Além disso apertando a tecla 't' é possível alternar do pontilhismo refinado para o simples.
+
+	A entrada do programa foi:
+
+.entrada do código
+image::atv8/vanessa.png[]
+
+
+	A saída do programa foi:
+
+* Para o código pontilhista simples:
+
+.saída do pontilhismo apresentado no tutorial
+image::imagens/8_pointilhismoNRefinado.png[]
+
+* Para o código pontilhista Refinado:
+
+.saída do pontilhismo refinado
+image::imagens/8_pointilhismoRefinado.png[]
+	
+
+	Além disso, para diversão, foi feito uso de outras imagens, cujas saídas refinadas estão mostradas abaixo:
+
+.saída de flores.png
+image::imagens/8_1outros.png[]
+
+
+.saída de um desenho da abertura de Rick and Morty
+image::imagens/8_3outros.png[]
+
+.saída da minha cachorrinha "Lili"
+image::imagens/8_2outros.png[]
+
+	Para exemplificação foi gravado um vídeo:
+
+* video para exemplificação. Apertando a tecla 't' podemos comparar os efeitos
+https://youtu.be/sNdNbY2kX48
+
+
+
+=== Quantização vetorial com k-means
+=== K-means com 10 iterações, nRodadas=1 e centros com inicialização aleatória
+
+* Utilizando o programa kmeans.cpp como exemplo prepare um programa exemplo onde a execução do código se dê usando o parâmetro nRodadas=1 e inciar os centros de forma aleatória usando o parâmetro KMEANS_RANDOM_CENTERS ao invés de KMEANS_PP_CENTERS. Realize 10 rodadas diferentes do algoritmo e compare as imagens produzidas. Explique porque elas podem diferir tanto.
+
+Para resolver essa questão implementamos o código abaixo:
+
+[source,c++]
+----
+include::atv9/kmeansModificado.cpp[]
+----
+
+	O algoritmo de K-means aprensentado consiste em uma segmentação de cores. Logo, vejamos um pseudocódigo do algorítmo de K-means:
+
+.pseudocódigo
+image::atv9/9_kmeans.png[]
+
+	Esse programa é uma modificação do código kmeans.cpp descrito nas atividades da disciplina. Para o programa, utilizamos um loop com 10 iterações, em cada iteração os centros do algoritmo de kmeans eram inicializados aleatoriamente, diferentemente para cada loop.
+	
+
+	As entradas do programa foram:
+
+.entrada mandala1.png
+image::atv9/mandala1.png[]
+
+.entrada mandala2.png
+image::atv9/mandala2.png[]
+
+.entrada sobremesa.png
+image::atv9/sobremesa.png[]
+
+
+	A saída do programa pode ser vista no video para exemplificação:
+
+* video para exemplificação
+https://youtu.be/gD3hcCqJxkw
+
+
+	Como podemos perceber a imagem gerada difere para cada inicialização de centros. O algoritmo escolhe centros que irão definir quais cores serão utilizadas para representar a imagem final (no nosso algoritmo definimos 15 cores). Desse modo, gerando os centros de maneira aleatória, o resultado final para cada centro é diferente, por isso a imagem varia a cada iteração.
+

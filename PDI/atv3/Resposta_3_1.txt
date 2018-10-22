@@ -1,0 +1,3 @@
+O código labeling.png utiliza o número do objeto encontrado como o tom de preenchimento daquele objeto, de modo que no fim o objeto terá o valor máximo de nobjects. Desse modo,se houvessem mais de 255 objetos na cena, não poderíamos executar o floodFill utilizando o nobjects, pois trabalhamos com apenas 256 tons de cinza (de 0 a 255), bem como o fato de que o elemento 255 seria pintado com sua própria cor 255, o que é reduntante e produz um erro na contagem (já que um objeto normalmente não é formado por apenas um pixel, ele contaria o mesmo objeto várias vezes).
+
+Uma solução para este problema seria passar a usar uma imagem colorida, com componentes RGB indo de 0 até 255, aumentariamos o valor máximo da contagem.

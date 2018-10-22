@@ -1,0 +1,78 @@
+<!-- um jogo é composto por 9 casas-->
+<!-- cada casa é uma posição apta para inserir um simbolo (x ou o)-->
+
+<!--
+ 0 |  1 |  2
+___|____|____
+ 3 |  4 |  5
+___|____|____
+ 6 |  7 |  8 
+   |    |
+
+-->
+<DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="jogo.css"/>   
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="jogo.js"></script>
+</head>
+<body>
+
+        <div id="jogo">
+            <div class="linha"> <!-- linha 1-->
+                <div class="coluna" id="casa0"></div> <!-- coluna 1 -->
+                <div class="coluna" id="casa1"></div> <!-- coluna 2 -->
+                <div class="coluna" id="casa2"></div> <!-- coluna 2 -->
+            </div>
+            <div class="linha"> <!-- linha 2-->
+                <div class="coluna" id="casa3"></div>
+                <div class="coluna" id="casa4"></div>
+                <div class="coluna" id="casa5"></div>
+            </div>
+            <div class="linha"> <!-- linha 3-->
+                <div class="coluna" id="casa6"></div>
+                <div class="coluna" id="casa7"></div>
+                <div class="coluna" id="casa8"></div>
+            </div>
+
+            
+             <form method="get" action="jogo.html">
+              <button type="submit">Novo Jogo</button>
+            </form>
+    
+        </div>
+
+        <div id="resultado"></div>
+        <div id="resultado2"></div>
+        
+        <div id="escolha3">
+          <b>Por favor, escolha o nível de dificuldade:</b>
+          <br>
+            <button id="dif1">Muito Fácil (nível noob) </button>
+            <button id="dif2" >Médio </button>
+            <button id="dif3" >Muito Difícil (nível expert) </button>
+          <img src="logo.png">
+        </div>
+        
+        <div id="escolha2">
+          <b>Por favor, escolha se deseja começar a partida ou não:</b>
+          <br>
+            <button id="comecar"  >Sim, quero começar</button>
+            <button id="Ncomecar">Não, o adversário pode começar</button> 
+          <img src="logo.png">
+        </div>
+
+
+        <div id="escolha1">
+          <b>Por favor, escolha o tipo de jogo:</b>
+          <br>
+            <button id="JM">Jogador x Máquina</button>  
+          <img src="logo.png">
+        </div>
+
+
+</body>
+</html>
+
+
